@@ -21,8 +21,11 @@ This MCP server acts as a bridge between large language models (like Claude) and
 
 ### Supported Exchanges
 > Binance (USDT-M Futures)
+
 > Bybit (planned)
+
 > OKX (planned)
+
 > Hyperliquid (planned)
 
 Status
