@@ -556,14 +556,14 @@ Use this section to track where we are. Mark steps as done with [x].
 - [x] 4.3 **CHECKPOINT**: Abstract interface importable (7 methods)
 
 ### Phase 5: Binance Client
-- [ ] 5.1 Create `src/crypto_mcp/exchanges/binance/endpoints.py`
-- [ ] 5.2 Create `src/crypto_mcp/exchanges/binance/exceptions.py`
-- [ ] 5.3 Create `src/crypto_mcp/exchanges/binance/models.py`
-- [ ] 5.4 Create `src/crypto_mcp/exchanges/binance/client.py`
-- [ ] 5.5 Create `src/crypto_mcp/exchanges/binance/__init__.py`
-- [ ] 5.6 Create `tests/unit/exchanges/binance/test_models.py`
-- [ ] 5.7 Create `tests/unit/exchanges/binance/test_client.py`
-- [ ] 5.8 **CHECKPOINT**: Run pytest, all Binance tests pass
+- [x] 5.1 Create `src/crypto_mcp/exchanges/binance/endpoints.py`
+- [x] 5.2 Create `src/crypto_mcp/exchanges/binance/exceptions.py`
+- [x] 5.3 Create `src/crypto_mcp/exchanges/binance/models.py`
+- [x] 5.4 Create `src/crypto_mcp/exchanges/binance/client.py`
+- [x] 5.5 Create `src/crypto_mcp/exchanges/binance/__init__.py`
+- [x] 5.6 Create `tests/unit/exchanges/binance/test_models.py`
+- [x] 5.7 Create `tests/unit/exchanges/binance/test_client.py`
+- [x] 5.8 **CHECKPOINT**: Run pytest, all Binance tests pass (35/35)
 
 ### Phase 6: Utilities
 - [ ] 6.1 Create `src/crypto_mcp/utils/http.py`
@@ -572,22 +572,22 @@ Use this section to track where we are. Mark steps as done with [x].
 - [ ] 6.4 **CHECKPOINT**: Utils importable, error conversion works
 
 ### Phase 7: MCP Tools
-- [ ] 7.1 Create `src/crypto_mcp/tools/open_interest.py`
-- [ ] 7.2 Create `tests/unit/tools/test_open_interest.py`
-- [ ] 7.3 Create `src/crypto_mcp/tools/mark_price.py`
-- [ ] 7.4 Create `tests/unit/tools/test_mark_price.py`
-- [ ] 7.5 Create `src/crypto_mcp/tools/ticker.py`
-- [ ] 7.6 Create `tests/unit/tools/test_ticker.py`
-- [ ] 7.7 Create `src/crypto_mcp/tools/klines.py`
-- [ ] 7.8 Create `tests/unit/tools/test_klines.py`
-- [ ] 7.9 Create `src/crypto_mcp/tools/funding_rate.py`
-- [ ] 7.10 Create `tests/unit/tools/test_funding_rate.py`
-- [ ] 7.11 Create `src/crypto_mcp/tools/open_interest_history.py`
-- [ ] 7.12 Create `tests/unit/tools/test_open_interest_history.py`
-- [ ] 7.13 Create `src/crypto_mcp/tools/long_short_ratio.py`
-- [ ] 7.14 Create `tests/unit/tools/test_long_short_ratio.py`
-- [ ] 7.15 Create `src/crypto_mcp/tools/__init__.py`
-- [ ] 7.16 **CHECKPOINT**: All tool tests pass
+- [x] 7.1 Create `src/crypto_mcp/tools/open_interest.py`
+- [x] 7.2 Create `tests/unit/tools/test_open_interest.py`
+- [x] 7.3 Create `src/crypto_mcp/tools/mark_price.py`
+- [x] 7.4 Create `tests/unit/tools/test_mark_price.py`
+- [x] 7.5 Create `src/crypto_mcp/tools/ticker.py`
+- [x] 7.6 Create `tests/unit/tools/test_ticker.py`
+- [x] 7.7 Create `src/crypto_mcp/tools/klines.py`
+- [x] 7.8 Create `tests/unit/tools/test_klines.py`
+- [x] 7.9 Create `src/crypto_mcp/tools/funding_rate.py`
+- [x] 7.10 Create `tests/unit/tools/test_funding_rate.py`
+- [x] 7.11 Create `src/crypto_mcp/tools/open_interest_history.py`
+- [x] 7.12 Create `tests/unit/tools/test_open_interest_history.py`
+- [x] 7.13 Create `src/crypto_mcp/tools/long_short_ratio.py`
+- [x] 7.14 Create `tests/unit/tools/test_long_short_ratio.py`
+- [x] 7.15 Create `src/crypto_mcp/tools/__init__.py`
+- [x] 7.16 **CHECKPOINT**: All tool tests pass (26/26 tool tests, 61/61 total)
 
 ### Phase 8: Server Assembly
 - [ ] 8.1 Create `src/crypto_mcp/server.py`
