@@ -1,5 +1,6 @@
 """MCP tool for funding rate data."""
 
+import asyncio
 from datetime import datetime
 
 from mcp.server.fastmcp import FastMCP
@@ -43,3 +44,39 @@ def register_funding_rate_tools(mcp: FastMCP, client: BinanceClient) -> None:
             end_time=end_dt,
         )
         return [r.model_dump(mode="json") for r in result]
+
+    @mcp.tool()
+    async def get_funding_rate_batch(
+        symbols: list[str],
+        limit: int = 100,
+        start_time: str | None = None,
+        end_time: str | None = None,
+    ) -> dict[str, list[dict]]:
+        """Get funding rate history for MULTIPLE symbols in parallel.
+
+        Use this tool instead of calling get_funding_rate multiple times.
+        Much faster for querying many symbols at once.
+
+        Args:
+            symbols: List of trading pair symbols (e.g., ["BTCUSDT", "ETHUSDT"])
+            limit: Number of records per symbol (1-1000, default 100)
+            start_time: Start time in ISO format (e.g., 2024-01-01T00:00:00)
+            end_time: End time in ISO format (e.g., 2024-01-02T00:00:00)
+
+        Returns:
+            Dict mapping each symbol to its list of funding rate records
+        """
+        start_dt = datetime.fromisoformat(start_time) if start_time else None
+        end_dt = datetime.fromisoformat(end_time) if end_time else None
+
+        async def fetch_one(sym: str) -> tuple[str, list[dict]]:
+            result = await client.get_funding_rate(
+                symbol=sym.upper(),
+                limit=limit,
+                start_time=start_dt,
+                end_time=end_dt,
+            )
+            return sym.upper(), [r.model_dump(mode="json") for r in result]
+
+        results = await asyncio.gather(*[fetch_one(s) for s in symbols])
+        return dict(results)

@@ -16,14 +16,17 @@ from crypto_mcp.tools import register_all_tools
 # expected tool names
 EXPECTED_TOOLS = [
     "get_open_interest",
+    "get_open_interest_batch",
     "get_mark_price",
     "get_ticker_24h",
     "get_klines",
     "get_klines_batch",
     "get_funding_rate",
+    "get_funding_rate_batch",
     "get_open_interest_history",
     "get_open_interest_history_batch",
     "get_long_short_ratio",
+    "get_long_short_ratio_batch",
 ]
 
 
@@ -47,9 +50,9 @@ class TestServerToolRegistration:
             assert tool_name in registered_tools, f"Tool {tool_name} not registered"
 
     def test_correct_number_of_tools(self, mcp_server):
-        """Verify exactly 9 tools are registered."""
+        """Verify exactly 12 tools are registered."""
         mcp, _ = mcp_server
-        assert len(mcp._tool_manager._tools) == 9
+        assert len(mcp._tool_manager._tools) == 12
 
 
 class TestServerImport:
