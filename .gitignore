@@ -5,6 +5,9 @@
 CLAUDE.md
 .claude/
 
+# Documentation (local working docs)
+docs/
+
 # Python virtual environment
 venv/
 __pycache__/
