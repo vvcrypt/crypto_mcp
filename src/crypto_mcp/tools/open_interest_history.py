@@ -5,11 +5,15 @@ from datetime import datetime
 
 from mcp.server.fastmcp import FastMCP
 
-from crypto_mcp.exchanges.binance import BinanceClient
+from crypto_mcp.exchanges.base import BaseExchangeClient
 from crypto_mcp.models.common import ValidPeriod
+from crypto_mcp.tools._utils import get_client
 
 
-def register_open_interest_history_tools(mcp: FastMCP, client: BinanceClient) -> None:
+def register_open_interest_history_tools(
+    mcp: FastMCP,
+    clients: dict[str, BaseExchangeClient],
+) -> None:
     """Register open interest history tools with the MCP server."""
 
     @mcp.tool()
@@ -19,6 +23,7 @@ def register_open_interest_history_tools(mcp: FastMCP, client: BinanceClient) ->
         limit: int = 30,
         start_time: str | None = None,
         end_time: str | None = None,
+        exchange: str = "binance",
     ) -> list[dict]:
         """Get historical open interest data for a futures symbol.
 
@@ -32,10 +37,13 @@ def register_open_interest_history_tools(mcp: FastMCP, client: BinanceClient) ->
             limit: Number of records to return (1-500, default 30)
             start_time: Start time in ISO format (e.g., 2024-01-01T00:00:00)
             end_time: End time in ISO format (e.g., 2024-01-02T00:00:00)
+            exchange: Exchange to query ("binance" or "bybit", default: binance)
 
         Returns:
             List of open interest records with symbol, value, timestamp, and exchange
         """
+        client = get_client(clients, exchange)
+
         # validate period
         ValidPeriod.validate(period)
 
@@ -59,6 +67,7 @@ def register_open_interest_history_tools(mcp: FastMCP, client: BinanceClient) ->
         limit: int = 30,
         start_time: str | None = None,
         end_time: str | None = None,
+        exchange: str = "binance",
     ) -> dict[str, list[dict]]:
         """Get historical open interest data for MULTIPLE symbols in parallel.
 
@@ -72,10 +81,12 @@ def register_open_interest_history_tools(mcp: FastMCP, client: BinanceClient) ->
             limit: Number of records per symbol (1-500, default 30)
             start_time: Start time in ISO format (e.g., 2024-01-01T00:00:00)
             end_time: End time in ISO format (e.g., 2024-01-02T00:00:00)
+            exchange: Exchange to query ("binance" or "bybit", default: binance)
 
         Returns:
             Dict mapping each symbol to its list of open interest records
         """
+        client = get_client(clients, exchange)
         ValidPeriod.validate(period)
 
         start_dt = datetime.fromisoformat(start_time) if start_time else None

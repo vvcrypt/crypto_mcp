@@ -12,17 +12,23 @@ from crypto_mcp.tools.open_interest import register_open_interest_tools
 
 @pytest.fixture
 def mock_client():
-    """Create a mock BinanceClient."""
+    """Create a mock exchange client."""
     client = MagicMock()
     client.get_open_interest = AsyncMock()
     return client
 
 
 @pytest.fixture
-def mcp_with_tools(mock_client):
+def mock_clients(mock_client):
+    """Create clients dict with mock client."""
+    return {"binance": mock_client, "bybit": mock_client}
+
+
+@pytest.fixture
+def mcp_with_tools(mock_clients):
     """Create FastMCP instance with open interest tools registered."""
     mcp = FastMCP("test-crypto")
-    register_open_interest_tools(mcp, mock_client)
+    register_open_interest_tools(mcp, mock_clients)
     return mcp
 
 
@@ -38,14 +44,10 @@ class TestGetOpenInterest:
             exchange="binance",
         )
 
-        # access the registered tool function
         tool_fn = mcp_with_tools._tool_manager._tools["get_open_interest"].fn
         result = await tool_fn(symbol="btcusdt")
 
-        # verify client called with uppercase symbol
         mock_client.get_open_interest.assert_called_once_with("BTCUSDT")
-
-        # verify result is serialized dict
         assert isinstance(result, dict)
         assert result["symbol"] == "BTCUSDT"
         assert result["open_interest"] == "12345.678"

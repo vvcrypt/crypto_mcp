@@ -5,11 +5,15 @@ from datetime import datetime
 
 from mcp.server.fastmcp import FastMCP
 
-from crypto_mcp.exchanges.binance import BinanceClient
+from crypto_mcp.exchanges.base import BaseExchangeClient
 from crypto_mcp.models.common import ValidInterval
+from crypto_mcp.tools._utils import get_client
 
 
-def register_klines_tools(mcp: FastMCP, client: BinanceClient) -> None:
+def register_klines_tools(
+    mcp: FastMCP,
+    clients: dict[str, BaseExchangeClient],
+) -> None:
     """Register klines tools with the MCP server."""
 
     @mcp.tool()
@@ -19,6 +23,7 @@ def register_klines_tools(mcp: FastMCP, client: BinanceClient) -> None:
         limit: int = 500,
         start_time: str | None = None,
         end_time: str | None = None,
+        exchange: str = "binance",
     ) -> dict:
         """Get OHLCV candlestick data for a futures symbol.
 
@@ -32,12 +37,15 @@ def register_klines_tools(mcp: FastMCP, client: BinanceClient) -> None:
             limit: Number of candles to return (1-1500, default 500)
             start_time: Start time in ISO format (e.g., 2024-01-01T00:00:00)
             end_time: End time in ISO format (e.g., 2024-01-02T00:00:00)
+            exchange: Exchange to query ("binance" or "bybit", default: binance)
 
         Returns:
             Klines data including symbol, interval, and list of candles
         """
-        # validate interval
-        ValidInterval.validate(interval)
+        client = get_client(clients, exchange)
+
+        # validate and normalize interval (accepts both Binance and Bybit formats)
+        normalized_interval = ValidInterval.validate(interval)
 
         # parse datetime strings if provided
         start_dt = datetime.fromisoformat(start_time) if start_time else None
@@ -45,7 +53,7 @@ def register_klines_tools(mcp: FastMCP, client: BinanceClient) -> None:
 
         result = await client.get_klines(
             symbol=symbol.upper(),
-            interval=interval,
+            interval=normalized_interval,
             limit=limit,
             start_time=start_dt,
             end_time=end_dt,
@@ -59,6 +67,7 @@ def register_klines_tools(mcp: FastMCP, client: BinanceClient) -> None:
         limit: int = 500,
         start_time: str | None = None,
         end_time: str | None = None,
+        exchange: str = "binance",
     ) -> dict[str, dict]:
         """Get OHLCV candlestick data for MULTIPLE symbols in parallel.
 
@@ -72,11 +81,13 @@ def register_klines_tools(mcp: FastMCP, client: BinanceClient) -> None:
             limit: Number of candles per symbol (1-1500, default 500)
             start_time: Start time in ISO format (e.g., 2024-01-01T00:00:00)
             end_time: End time in ISO format (e.g., 2024-01-02T00:00:00)
+            exchange: Exchange to query ("binance" or "bybit", default: binance)
 
         Returns:
             Dict mapping each symbol to its klines data
         """
-        ValidInterval.validate(interval)
+        client = get_client(clients, exchange)
+        normalized_interval = ValidInterval.validate(interval)
 
         start_dt = datetime.fromisoformat(start_time) if start_time else None
         end_dt = datetime.fromisoformat(end_time) if end_time else None
@@ -84,7 +95,7 @@ def register_klines_tools(mcp: FastMCP, client: BinanceClient) -> None:
         async def fetch_one(sym: str) -> tuple[str, dict]:
             result = await client.get_klines(
                 symbol=sym.upper(),
-                interval=interval,
+                interval=normalized_interval,
                 limit=limit,
                 start_time=start_dt,
                 end_time=end_dt,

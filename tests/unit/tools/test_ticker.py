@@ -12,17 +12,23 @@ from crypto_mcp.tools.ticker import register_ticker_tools
 
 @pytest.fixture
 def mock_client():
-    """Create a mock BinanceClient."""
+    """Create a mock exchange client."""
     client = MagicMock()
     client.get_ticker_24h = AsyncMock()
     return client
 
 
 @pytest.fixture
-def mcp_with_tools(mock_client):
+def mock_clients(mock_client):
+    """Create clients dict with mock client."""
+    return {"binance": mock_client, "bybit": mock_client}
+
+
+@pytest.fixture
+def mcp_with_tools(mock_clients):
     """Create FastMCP instance with ticker tools registered."""
     mcp = FastMCP("test-crypto")
-    register_ticker_tools(mcp, mock_client)
+    register_ticker_tools(mcp, mock_clients)
     return mcp
 
 

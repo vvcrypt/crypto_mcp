@@ -2,15 +2,21 @@
 
 from mcp.server.fastmcp import FastMCP
 
-from crypto_mcp.exchanges.binance import BinanceClient
-from crypto_mcp.models import TickerResponse
+from crypto_mcp.exchanges.base import BaseExchangeClient
+from crypto_mcp.tools._utils import get_client
 
 
-def register_ticker_tools(mcp: FastMCP, client: BinanceClient) -> None:
+def register_ticker_tools(
+    mcp: FastMCP,
+    clients: dict[str, BaseExchangeClient],
+) -> None:
     """Register ticker tools with the MCP server."""
 
     @mcp.tool()
-    async def get_ticker_24h(symbol: str | None = None) -> dict | list[dict]:
+    async def get_ticker_24h(
+        symbol: str | None = None,
+        exchange: str = "binance",
+    ) -> dict | list[dict]:
         """Get 24-hour price and volume statistics for futures symbols.
 
         Returns rolling 24h window statistics including price change,
@@ -18,10 +24,12 @@ def register_ticker_tools(mcp: FastMCP, client: BinanceClient) -> None:
 
         Args:
             symbol: Trading pair symbol (e.g., BTCUSDT). If None, returns all symbols.
+            exchange: Exchange to query ("binance" or "bybit", default: binance)
 
         Returns:
             24h ticker statistics. Returns a list if no symbol specified.
         """
+        client = get_client(clients, exchange)
         result = await client.get_ticker_24h(symbol.upper() if symbol else None)
 
         if isinstance(result, list):

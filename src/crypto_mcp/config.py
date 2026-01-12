@@ -11,6 +11,11 @@ class Settings(BaseSettings):
     binance_api_key: str | None = None
     binance_api_secret: str | None = None
 
+    # bybit
+    bybit_futures_base_url: str = "https://api.bybit.com"
+    bybit_api_key: str | None = None
+    bybit_api_secret: str | None = None
+
     # http client
     http_timeout: float = 30.0
 

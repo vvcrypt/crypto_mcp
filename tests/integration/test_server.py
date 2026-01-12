@@ -38,7 +38,8 @@ class TestServerToolRegistration:
         """Create an MCP server with all tools registered."""
         mcp = FastMCP("test-crypto-server")
         mock_client = AsyncMock(spec=BinanceClient)
-        register_all_tools(mcp, mock_client)
+        mock_clients = {"binance": mock_client, "bybit": mock_client}
+        register_all_tools(mcp, mock_clients)
         return mcp, mock_client
 
     def test_all_tools_registered(self, mcp_server):
@@ -79,7 +80,8 @@ class TestToolExecution:
         """Create MCP server with mock client that returns test data."""
         mcp = FastMCP("test-execution")
         mock_client = AsyncMock(spec=BinanceClient)
-        register_all_tools(mcp, mock_client)
+        mock_clients = {"binance": mock_client, "bybit": mock_client}
+        register_all_tools(mcp, mock_clients)
         return mcp, mock_client
 
     @pytest.mark.asyncio

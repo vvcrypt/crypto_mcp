@@ -8,6 +8,9 @@ CLAUDE.md
 # Documentation (local working docs)
 docs/
 
+# Content (local content drafts)
+content/
+
 # Python virtual environment
 venv/
 __pycache__/

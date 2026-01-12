@@ -88,7 +88,8 @@ def mock_binance_client():
 def mcp_server_with_mock(mock_binance_client):
     """Create an MCP server with mock client for testing tools."""
     mcp = FastMCP("test-performance")
-    register_all_tools(mcp, mock_binance_client)
+    mock_clients = {"binance": mock_binance_client, "bybit": mock_binance_client}
+    register_all_tools(mcp, mock_clients)
     return mcp, mock_binance_client
 
 

@@ -5,10 +5,14 @@ from datetime import datetime
 
 from mcp.server.fastmcp import FastMCP
 
-from crypto_mcp.exchanges.binance import BinanceClient
+from crypto_mcp.exchanges.base import BaseExchangeClient
+from crypto_mcp.tools._utils import get_client
 
 
-def register_funding_rate_tools(mcp: FastMCP, client: BinanceClient) -> None:
+def register_funding_rate_tools(
+    mcp: FastMCP,
+    clients: dict[str, BaseExchangeClient],
+) -> None:
     """Register funding rate tools with the MCP server."""
 
     @mcp.tool()
@@ -17,6 +21,7 @@ def register_funding_rate_tools(mcp: FastMCP, client: BinanceClient) -> None:
         limit: int = 100,
         start_time: str | None = None,
         end_time: str | None = None,
+        exchange: str = "binance",
     ) -> list[dict]:
         """Get funding rate history for futures symbols.
 
@@ -29,10 +34,13 @@ def register_funding_rate_tools(mcp: FastMCP, client: BinanceClient) -> None:
             limit: Number of records to return (1-1000, default 100)
             start_time: Start time in ISO format (e.g., 2024-01-01T00:00:00)
             end_time: End time in ISO format (e.g., 2024-01-02T00:00:00)
+            exchange: Exchange to query ("binance" or "bybit", default: binance)
 
         Returns:
             List of funding rate records with symbol, rate, funding time, and mark price
         """
+        client = get_client(clients, exchange)
+
         # parse datetime strings if provided
         start_dt = datetime.fromisoformat(start_time) if start_time else None
         end_dt = datetime.fromisoformat(end_time) if end_time else None
@@ -51,6 +59,7 @@ def register_funding_rate_tools(mcp: FastMCP, client: BinanceClient) -> None:
         limit: int = 100,
         start_time: str | None = None,
         end_time: str | None = None,
+        exchange: str = "binance",
     ) -> dict[str, list[dict]]:
         """Get funding rate history for MULTIPLE symbols in parallel.
 
@@ -62,10 +71,12 @@ def register_funding_rate_tools(mcp: FastMCP, client: BinanceClient) -> None:
             limit: Number of records per symbol (1-1000, default 100)
             start_time: Start time in ISO format (e.g., 2024-01-01T00:00:00)
             end_time: End time in ISO format (e.g., 2024-01-02T00:00:00)
+            exchange: Exchange to query ("binance" or "bybit", default: binance)
 
         Returns:
             Dict mapping each symbol to its list of funding rate records
         """
+        client = get_client(clients, exchange)
         start_dt = datetime.fromisoformat(start_time) if start_time else None
         end_dt = datetime.fromisoformat(end_time) if end_time else None
 

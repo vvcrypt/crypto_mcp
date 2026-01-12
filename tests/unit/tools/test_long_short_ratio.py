@@ -14,17 +14,23 @@ from crypto_mcp.tools.long_short_ratio import register_long_short_ratio_tools
 
 @pytest.fixture
 def mock_client():
-    """Create a mock BinanceClient."""
+    """Create a mock exchange client."""
     client = MagicMock()
     client.get_long_short_ratio = AsyncMock()
     return client
 
 
 @pytest.fixture
-def mcp_with_tools(mock_client):
+def mock_clients(mock_client):
+    """Create clients dict with mock client."""
+    return {"binance": mock_client, "bybit": mock_client}
+
+
+@pytest.fixture
+def mcp_with_tools(mock_clients):
     """Create FastMCP instance with long/short ratio tools registered."""
     mcp = FastMCP("test-crypto")
-    register_long_short_ratio_tools(mcp, mock_client)
+    register_long_short_ratio_tools(mcp, mock_clients)
     return mcp
 
 
