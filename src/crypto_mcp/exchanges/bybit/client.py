@@ -1,12 +1,19 @@
 """Bybit V5 Futures API client."""
 
+from __future__ import annotations
+
+import asyncio
 import json
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 import httpx
 from pydantic import ValidationError as PydanticValidationError
 
 from crypto_mcp.exchanges.base import BaseExchangeClient
+
+if TYPE_CHECKING:
+    from crypto_mcp.utils.rate_limiter import SlidingWindowRateLimiter
 from crypto_mcp.models import (
     FundingRateResponse,
     KlinesResponse,
@@ -26,7 +33,7 @@ from .endpoints import (
     map_interval,
     map_period,
 )
-from .exceptions import BybitAPIError, raise_for_bybit_error
+from .exceptions import BybitAPIError, BybitRateLimitError, raise_for_bybit_error
 from .models import (
     BybitErrorResponse,
     BybitFundingRateResponse,
@@ -40,9 +47,16 @@ from .models import (
 class BybitClient(BaseExchangeClient):
     """Bybit V5 Perpetual Futures API client."""
 
-    def __init__(self, http_client: httpx.AsyncClient | None = None):
+    def __init__(
+        self,
+        http_client: httpx.AsyncClient | None = None,
+        rate_limiter: SlidingWindowRateLimiter | None = None,
+        max_retries: int = 3,
+    ):
         self._client = http_client
         self._owns_client = http_client is None
+        self._rate_limiter = rate_limiter
+        self._max_retries = max_retries
 
     async def _get_client(self) -> httpx.AsyncClient:
         """Get or create HTTP client."""
@@ -57,7 +71,31 @@ class BybitClient(BaseExchangeClient):
             self._client = None
 
     async def _request(self, endpoint: str, params: dict | None = None) -> dict:
-        """Make GET request to Bybit API."""
+        """Make GET request to Bybit API with rate limiting and retry."""
+        # acquire rate limit slot before making request
+        if self._rate_limiter:
+            await self._rate_limiter.acquire()
+
+        last_error: Exception | None = None
+
+        for attempt in range(self._max_retries):
+            try:
+                return await self._do_request(endpoint, params)
+            except BybitRateLimitError as e:
+                last_error = e
+                if attempt < self._max_retries - 1:
+                    # exponential backoff: 1s, 2s, 4s
+                    wait_time = 2**attempt
+                    await asyncio.sleep(wait_time)
+                    # also re-acquire rate limit slot
+                    if self._rate_limiter:
+                        await self._rate_limiter.acquire()
+
+        # all retries exhausted
+        raise last_error  # type: ignore[misc]
+
+    async def _do_request(self, endpoint: str, params: dict | None = None) -> dict:
+        """Execute the actual HTTP request."""
         client = await self._get_client()
         response = await client.get(endpoint, params=params)
 

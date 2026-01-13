@@ -19,6 +19,13 @@ class Settings(BaseSettings):
     # http client
     http_timeout: float = 30.0
 
+    # rate limiting
+    rate_limit_enabled: bool = True
+    binance_rate_limit: int = 1200  # requests per minute (conservative)
+    bybit_rate_limit: int = 100  # requests per minute (conservative)
+    rate_limit_retry_enabled: bool = True
+    rate_limit_max_retries: int = 3
+
     # server
     server_name: str = "Crypto Data MCP"
     log_level: str = "INFO"

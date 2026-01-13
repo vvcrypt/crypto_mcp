@@ -270,11 +270,13 @@ class TestErrorHandling:
 
     @pytest.mark.asyncio
     async def test_rate_limit_error(self, httpx_mock: HTTPXMock, client):
-        httpx_mock.add_response(
-            url=f"{BASE_URL}/fapi/v1/openInterest?symbol=BTCUSDT",
-            status_code=429,
-            json={"code": -1003, "msg": "Too many requests."},
-        )
+        # need to mock 3 responses because the client retries 3 times
+        for _ in range(3):
+            httpx_mock.add_response(
+                url=f"{BASE_URL}/fapi/v1/openInterest?symbol=BTCUSDT",
+                status_code=429,
+                json={"code": -1003, "msg": "Too many requests."},
+            )
         with pytest.raises(BinanceRateLimitError):
             await client.get_open_interest("BTCUSDT")
 
