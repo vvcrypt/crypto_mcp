@@ -9,6 +9,7 @@ from crypto_mcp.exchanges.base import BaseExchangeClient
 from crypto_mcp.utils.cache import TTLCache
 
 from ._utils import SUPPORTED_EXCHANGES, get_client
+from .derived_metrics import register_derived_metrics_tools
 from .funding_rate import register_funding_rate_tools
 from .klines import register_klines_tools
 from .long_short_ratio import register_long_short_ratio_tools
@@ -40,6 +41,9 @@ def register_all_tools(
     register_funding_rate_tools(mcp, clients)
     register_open_interest_history_tools(mcp, clients)
     register_long_short_ratio_tools(mcp, clients)
+
+    # derived metrics (calculations based on other data)
+    register_derived_metrics_tools(mcp, clients)
 
 
 __all__ = ["register_all_tools", "get_client", "SUPPORTED_EXCHANGES"]

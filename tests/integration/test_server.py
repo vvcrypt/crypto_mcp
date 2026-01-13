@@ -27,6 +27,7 @@ EXPECTED_TOOLS = [
     "get_open_interest_history_batch",
     "get_long_short_ratio",
     "get_long_short_ratio_batch",
+    "get_derived_metrics",
 ]
 
 
@@ -51,9 +52,9 @@ class TestServerToolRegistration:
             assert tool_name in registered_tools, f"Tool {tool_name} not registered"
 
     def test_correct_number_of_tools(self, mcp_server):
-        """Verify exactly 12 tools are registered."""
+        """Verify exactly 13 tools are registered."""
         mcp, _ = mcp_server
-        assert len(mcp._tool_manager._tools) == 12
+        assert len(mcp._tool_manager._tools) == 13
 
 
 class TestServerImport:
