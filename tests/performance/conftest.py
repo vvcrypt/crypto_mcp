@@ -11,6 +11,7 @@ from mcp.server.fastmcp import FastMCP
 from crypto_mcp.config import Settings
 from crypto_mcp.exchanges.binance import BinanceClient
 from crypto_mcp.tools import register_all_tools
+from crypto_mcp.utils.cache import TTLCache, reset_cache_stats
 from crypto_mcp.models import (
     OpenInterestResponse,
     FundingRateResponse,
@@ -87,9 +88,13 @@ def mock_binance_client():
 @pytest.fixture
 def mcp_server_with_mock(mock_binance_client):
     """Create an MCP server with mock client for testing tools."""
+    # reset cache stats before each test
+    reset_cache_stats()
+
     mcp = FastMCP("test-performance")
     mock_clients = {"binance": mock_binance_client, "bybit": mock_binance_client}
-    register_all_tools(mcp, mock_clients)
+    cache = TTLCache(ttl=3.0, enabled=True)
+    register_all_tools(mcp, mock_clients, cache)
     return mcp, mock_binance_client
 
 

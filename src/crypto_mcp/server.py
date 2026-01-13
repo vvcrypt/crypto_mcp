@@ -13,6 +13,7 @@ from crypto_mcp.exchanges.bybit import BybitClient
 from crypto_mcp.exchanges.bybit.endpoints import BASE_URL as BYBIT_BASE_URL
 from crypto_mcp.tools import register_all_tools
 from crypto_mcp.utils.rate_limiter import SlidingWindowRateLimiter
+from crypto_mcp.utils.cache import TTLCache
 
 
 settings = Settings()
@@ -31,6 +32,12 @@ async def lifespan(server: FastMCP) -> AsyncIterator[None]:
         SlidingWindowRateLimiter(max_requests=settings.bybit_rate_limit)
         if settings.rate_limit_enabled
         else None
+    )
+
+    # create response cache
+    cache = TTLCache(
+        ttl=settings.cache_ttl,
+        enabled=settings.cache_enabled,
     )
 
     # create separate HTTP clients for each exchange
@@ -55,7 +62,7 @@ async def lifespan(server: FastMCP) -> AsyncIterator[None]:
                     max_retries=settings.rate_limit_max_retries,
                 ),
             }
-            register_all_tools(server, clients)
+            register_all_tools(server, clients, cache)
             yield
 
 

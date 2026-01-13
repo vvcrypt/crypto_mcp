@@ -4,11 +4,13 @@ from mcp.server.fastmcp import FastMCP
 
 from crypto_mcp.exchanges.base import BaseExchangeClient
 from crypto_mcp.tools._utils import get_client
+from crypto_mcp.utils.cache import TTLCache
 
 
 def register_ticker_tools(
     mcp: FastMCP,
     clients: dict[str, BaseExchangeClient],
+    cache: TTLCache | None = None,
 ) -> None:
     """Register ticker tools with the MCP server."""
 
@@ -29,9 +31,26 @@ def register_ticker_tools(
         Returns:
             24h ticker statistics. Returns a list if no symbol specified.
         """
+        normalized_symbol = symbol.upper() if symbol else None
+        cache_key = f"ticker_24h:{exchange}:{normalized_symbol}"
+
+        # check cache first
+        if cache:
+            hit, cached_value = await cache.get(cache_key)
+            if hit:
+                return cached_value
+
+        # cache miss - fetch from API
         client = get_client(clients, exchange)
-        result = await client.get_ticker_24h(symbol.upper() if symbol else None)
+        result = await client.get_ticker_24h(normalized_symbol)
 
         if isinstance(result, list):
-            return [r.model_dump(mode="json") for r in result]
-        return result.model_dump(mode="json")
+            response = [r.model_dump(mode="json") for r in result]
+        else:
+            response = result.model_dump(mode="json")
+
+        # store in cache
+        if cache:
+            await cache.set(cache_key, response)
+
+        return response

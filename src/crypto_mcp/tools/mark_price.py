@@ -4,11 +4,13 @@ from mcp.server.fastmcp import FastMCP
 
 from crypto_mcp.exchanges.base import BaseExchangeClient
 from crypto_mcp.tools._utils import get_client
+from crypto_mcp.utils.cache import TTLCache
 
 
 def register_mark_price_tools(
     mcp: FastMCP,
     clients: dict[str, BaseExchangeClient],
+    cache: TTLCache | None = None,
 ) -> None:
     """Register mark price tools with the MCP server."""
 
@@ -30,9 +32,26 @@ def register_mark_price_tools(
             Mark price data including mark price, index price, funding rate,
             and next funding time. Returns a list if no symbol specified.
         """
+        normalized_symbol = symbol.upper() if symbol else None
+        cache_key = f"mark_price:{exchange}:{normalized_symbol}"
+
+        # check cache first
+        if cache:
+            hit, cached_value = await cache.get(cache_key)
+            if hit:
+                return cached_value
+
+        # cache miss - fetch from API
         client = get_client(clients, exchange)
-        result = await client.get_mark_price(symbol.upper() if symbol else None)
+        result = await client.get_mark_price(normalized_symbol)
 
         if isinstance(result, list):
-            return [r.model_dump(mode="json") for r in result]
-        return result.model_dump(mode="json")
+            response = [r.model_dump(mode="json") for r in result]
+        else:
+            response = result.model_dump(mode="json")
+
+        # store in cache
+        if cache:
+            await cache.set(cache_key, response)
+
+        return response

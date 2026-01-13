@@ -26,6 +26,10 @@ class Settings(BaseSettings):
     rate_limit_retry_enabled: bool = True
     rate_limit_max_retries: int = 3
 
+    # caching
+    cache_enabled: bool = True
+    cache_ttl: float = 3.0  # seconds
+
     # server
     server_name: str = "Crypto Data MCP"
     log_level: str = "INFO"

@@ -7,11 +7,13 @@ from mcp.server.fastmcp import FastMCP
 from crypto_mcp.exchanges.base import BaseExchangeClient
 from crypto_mcp.models import OpenInterestResponse
 from crypto_mcp.tools._utils import get_client
+from crypto_mcp.utils.cache import TTLCache
 
 
 def register_open_interest_tools(
     mcp: FastMCP,
     clients: dict[str, BaseExchangeClient],
+    cache: TTLCache | None = None,
 ) -> None:
     """Register open interest tools with the MCP server."""
 
@@ -32,9 +34,25 @@ def register_open_interest_tools(
         Returns:
             Open interest data including symbol, amount, timestamp, and exchange
         """
+        normalized_symbol = symbol.upper()
+        cache_key = f"open_interest:{exchange}:{normalized_symbol}"
+
+        # check cache first
+        if cache:
+            hit, cached_value = await cache.get(cache_key)
+            if hit:
+                return cached_value
+
+        # cache miss - fetch from API
         client = get_client(clients, exchange)
-        result: OpenInterestResponse = await client.get_open_interest(symbol.upper())
-        return result.model_dump(mode="json")
+        result: OpenInterestResponse = await client.get_open_interest(normalized_symbol)
+        response = result.model_dump(mode="json")
+
+        # store in cache
+        if cache:
+            await cache.set(cache_key, response)
+
+        return response
 
     @mcp.tool()
     async def get_open_interest_batch(

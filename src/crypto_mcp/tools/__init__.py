@@ -6,6 +6,7 @@ This module provides functions to register all MCP tools with a FastMCP server.
 from mcp.server.fastmcp import FastMCP
 
 from crypto_mcp.exchanges.base import BaseExchangeClient
+from crypto_mcp.utils.cache import TTLCache
 
 from ._utils import SUPPORTED_EXCHANGES, get_client
 from .funding_rate import register_funding_rate_tools
@@ -20,16 +21,21 @@ from .ticker import register_ticker_tools
 def register_all_tools(
     mcp: FastMCP,
     clients: dict[str, BaseExchangeClient],
+    cache: TTLCache | None = None,
 ) -> None:
     """Register all MCP tools with the server.
 
     Args:
         mcp: FastMCP server instance
         clients: Dict mapping exchange names to client instances
+        cache: Optional TTLCache for response caching
     """
-    register_open_interest_tools(mcp, clients)
-    register_mark_price_tools(mcp, clients)
-    register_ticker_tools(mcp, clients)
+    # tools with caching
+    register_open_interest_tools(mcp, clients, cache)
+    register_mark_price_tools(mcp, clients, cache)
+    register_ticker_tools(mcp, clients, cache)
+
+    # tools without caching (historical data, variable params)
     register_klines_tools(mcp, clients)
     register_funding_rate_tools(mcp, clients)
     register_open_interest_history_tools(mcp, clients)
