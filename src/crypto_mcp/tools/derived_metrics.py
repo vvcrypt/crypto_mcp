@@ -1,6 +1,7 @@
 """MCP tool for derived metrics calculations."""
 
 from decimal import Decimal
+from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
@@ -41,7 +42,7 @@ def register_derived_metrics_tools(
         """
         client = get_client(clients, exchange)
         normalized_symbol = symbol.upper()
-        result = {}
+        result: dict[str, Any] = {}
 
         if "vwap" in metrics:
             result["vwap"] = await _calculate_vwap(
@@ -118,7 +119,7 @@ async def _calculate_funding_trend(
     if not changes:
         return {"direction": "neutral", "strength": Decimal("0")}
 
-    avg_change = sum(changes) / len(changes)
+    avg_change = sum(changes, Decimal("0")) / len(changes)
 
     # determine direction
     threshold = Decimal("0.00001")  # 0.001%

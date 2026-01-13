@@ -209,6 +209,7 @@ class BinanceClient(BaseExchangeClient):
             params["endTime"] = self._datetime_to_ms(end_time)
 
         data = await self._request(KLINES, params)
+        assert isinstance(data, list)
         return parse_kline(data, symbol, interval)
 
     async def get_mark_price(

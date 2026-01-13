@@ -45,6 +45,7 @@ def register_mark_price_tools(
         client = get_client(clients, exchange)
         result = await client.get_mark_price(normalized_symbol)
 
+        response: dict | list[dict]
         if isinstance(result, list):
             response = [r.model_dump(mode="json") for r in result]
         else:
